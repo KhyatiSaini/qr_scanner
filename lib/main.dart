@@ -2,9 +2,24 @@ import 'dart:async';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
-  runApp(const HomePage());
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: const HomePage(),
+      theme: ThemeData(
+        brightness: Brightness.light,
+      ),
+    );
+  }
 }
 
 class HomePage extends StatefulWidget {
@@ -12,12 +27,12 @@ class HomePage extends StatefulWidget {
 
   @override
   HomePageState createState() {
-    return  HomePageState();
+    return HomePageState();
   }
 }
 
 class HomePageState extends State<HomePage> {
-  String result = "Hey there !";
+  String greeting = "Hey there!";
   ScanResult? scanResult;
 
   /*Future _scanQR() async {
@@ -69,20 +84,114 @@ class HomePageState extends State<HomePage> {
     final scanResult = this.scanResult;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("QR Scanner"),
+        title: const Text(
+          "QR Scanner",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w400,
+            letterSpacing: 1,
+          ),
+        ),
       ),
       body: Center(
-        child: Text(
-          result,
-          style: const TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              greeting,
+              style: const TextStyle(
+                fontSize: 35.0,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            scanResult != null
+                ? ScanResultCardWidget(scanResult: scanResult, visible: true)
+                : Container()
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(Icons.camera_alt),
-        label: const Text("Scan"),
+        label: const Text(
+          "SCAN",
+          style: TextStyle(
+            fontWeight: FontWeight.w400,
+          ),
+        ),
         onPressed: _scanQR,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+}
+
+class ScanResultCardWidget extends StatelessWidget {
+  final ScanResult scanResult;
+  final bool visible;
+
+  const ScanResultCardWidget({Key? key, required this.scanResult, required this.visible})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: visible ? 1.0: 0.0,
+      duration: const Duration(seconds: 2),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.6,
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Text(
+              'Scan Result'.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            RichText(
+              text: TextSpan(
+                  text: 'format : '.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 1,
+                    fontSize: 16,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: scanResult.format.name.toUpperCase(),
+                    )
+                  ]),
+            ),
+            RichText(
+              text: TextSpan(
+                text: 'Value : '.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: 1,
+                  fontSize: 16,
+                ),
+                children: [
+                  TextSpan(
+                    text: scanResult.format.value.toString(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
